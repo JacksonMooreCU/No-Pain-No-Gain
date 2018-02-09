@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import pygame
+import math
 #No Pain No Gain Class Files
 
 class Entity :
@@ -58,7 +59,9 @@ class Player (Entity):
 		self.size = (data[0] * 2,data[0] * 2)
 		self.destination = data[0]
 		self.moving = False
-		self.speed = 1
+		self.speed = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10]
+		self.speed_level = 4
+		self.health = 100
 		self.velocity = None
 		
 	def render (self, window_sfc):
@@ -71,12 +74,19 @@ class Player (Entity):
 			
 			pygame.draw.circle(window_sfc, (255, 255, 255), self.location, self.radius)
 			
+		stats = "Health: "+str(self.health)+" Speed: "+str(self.speed_level)
+				
+			
+		myfont = pygame.font.SysFont('Impact', 30)
+		textsurface = myfont.render(stats, False, (0, 0, 255))
+		window_sfc.blit(textsurface,(100, 50))
+			
 	def check_moving (self, arena):
 		if (arena.clicked()[0]):
 			self.destination = arena.clicked()[1]
 			pos = self.location
 			target = self.destination
-			self.velocity = ((target[0]-pos[0])*0.05,(target[1]-pos[1])*0.05)
+			self.velocity = ((target[0]-pos[0])*self.speed[self.speed_level],(target[1]-pos[1])*self.speed[self.speed_level])
 			self.moving = True
 			
 			
@@ -100,8 +110,7 @@ class Player (Entity):
 				self.destination = None
 				self.velocity = None
 				self.moving = False
-			
-		
+				
 class Line (Entity):
 	
 	def __init__(self, data):
@@ -110,9 +119,85 @@ class Line (Entity):
 		self.angle = data[1]
 		self.lengths = data[2]
 		self.segments = data[3]
+		self.damage = data[4]
 	
 	def render (self, window_sfc):
 		# draw each of the rotating line segments
 		for seg in self.segments:
 	
 			pygame.draw.aaline(window_sfc, (255, 255, 255), seg[0], seg[1])
+			
+	def compute_line (self, arena):
+	
+		# the points associated with each line segment must be recalculated as the angle changes
+		self.segments = []
+		
+		# consider every line segment length
+		for len in self.lengths:
+
+			# compute the start of the line...
+			sol_x = self.location[0] + math.cos(math.radians(self.angle)) * arena.radius * len[0]
+			sol_y = self.location[1] + math.sin(math.radians(self.angle)) * arena.radius * len[0]
+			
+			# ...and the end of the self...
+			eol_x = self.location[0] + math.cos(math.radians(self.angle)) * arena.radius * len[1]
+			eol_y = self.location[1] + math.sin(math.radians(self.angle)) * arena.radius * len[1]
+			
+			# ...and then add that line to the list
+			self.segments.append( ((sol_x, sol_y), (eol_x, eol_y)) )
+			
+	def check_collision (self,player):
+	
+		# start by assuming that no collisions have occurred
+		player.collision = False
+	
+		# consider possible collisions between the circle hitbox and each line segment
+		for seg in self.segments:
+		
+			# if there is any collision at all, the circle hitbox flag is set
+			if self.detect_collision_line_circ(seg, (player.location, player.radius)):
+				player.health -= self.damage
+				player.collision = True
+				break
+			
+	def detect_collision_line_circ(self, u, v):
+
+		# unpack u; a line is an ordered pair of points and a point is an ordered pair of co-ordinates
+		(u_sol, u_eol) = u
+		(u_sol_x, u_sol_y) = u_sol
+		(u_eol_x, u_eol_y) = u_eol
+
+		# unpack v; a circle is a center point and a radius (and a point is still an ordered pair of co-ordinates)
+		(v_ctr, v_rad) = v
+		(v_ctr_x, v_ctr_y) = v_ctr
+
+		# the equation for all points on the line segment u can be considered u = u_sol + t * (u_eol - u_sol), for t in [0, 1]
+		# the center of the circle and the nearest point on the line segment (that which we are trying to find) define a line 
+		# that is is perpendicular to the line segment u (i.e., the dot product will be 0); in other words, it suffices to take
+		# the equation v_ctr - (u_sol + t * (u_eol - u_sol)) · (u_evol - u_sol) and solve for t
+		
+		t = ((v_ctr_x - u_sol_x) * (u_eol_x - u_sol_x) + (v_ctr_y - u_sol_y) * (u_eol_y - u_sol_y)) / ((u_eol_x - u_sol_x) ** 2 + (u_eol_y - u_sol_y) ** 2)
+
+		# this t can be used to find the nearest point w on the infinite line between u_sol and u_sol, but the line is not 
+		# infinite so it is necessary to restrict t to a value in [0, 1]
+		t = max(min(t, 1), 0)
+		
+		# so the nearest point on the line segment, w, is defined as
+		w_x = u_sol_x + t * (u_eol_x - u_sol_x)
+		w_y = u_sol_y + t * (u_eol_y - u_sol_y)
+		
+		# Euclidean distance squared between w and v_ctr
+		d_sqr = (w_x - v_ctr_x) ** 2 + (w_y - v_ctr_y) ** 2
+		
+		# if the Euclidean distance squared is less than the radius squared
+		if (d_sqr <= v_rad ** 2):
+		
+			# the line collides
+			return True  # the point of collision is (int(w_x), int(w_y))
+			
+		else:
+		
+			# the line does not collide
+			return False
+
+		# visit http://ericleong.me/research/circle-line/ for a good supplementary resource on collision detection

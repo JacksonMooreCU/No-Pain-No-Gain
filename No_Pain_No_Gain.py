@@ -53,12 +53,9 @@ def quit():
 	
 def main_game_update(arena,line, player):
 
-	
-
 	# increase the angle of the rotating line
 	line.angle = (line.angle + 1)
 
-	
 	# the rotating line angle ranges between 90 and 180 degrees
 	if line.angle > 179:
 
@@ -73,29 +70,13 @@ def main_game_update(arena,line, player):
 	line.segments = []
 	
 	# consider every line segment length
-	for len in line.lengths:
+	line.compute_line(arena)
 	
-		# compute the start of the line...
-		sol_x = line.location[0] + math.cos(math.radians(line.angle)) * arena.radius * len[0]
-		sol_y = line.location[1] + math.sin(math.radians(line.angle)) * arena.radius * len[0]
-		
-		# ...and the end of the line...
-		eol_x = line.location[0] + math.cos(math.radians(line.angle)) * arena.radius * len[1]
-		eol_y = line.location[1] + math.sin(math.radians(line.angle)) * arena.radius * len[1]
-		
-		# ...and then add that line to the list
-		line.segments.append( ((sol_x, sol_y), (eol_x, eol_y)) )
-
 	# start by assuming that no collisions have occurred
 	player.collision = False
 	
 	# consider possible collisions between the circle hitbox and each line segment
-	for seg in line.segments:
-	
-		# if there is any collision at all, the circle hitbox flag is set
-		if detect_collision_line_circ(seg, (player.location, player.radius)):
-			player.collision = True
-			break
+	line.check_collision(player)
 
 	# return the new state of the rotating line and the circle hitbox
 	return line, player
@@ -103,47 +84,7 @@ def main_game_update(arena,line, player):
 #############                                           HELPERS                                                    #############
 #### ---------------------------------------------------------------------------------------------------------------------- ####
 
-def detect_collision_line_circ(u, v):
 
-	# unpack u; a line is an ordered pair of points and a point is an ordered pair of co-ordinates
-	(u_sol, u_eol) = u
-	(u_sol_x, u_sol_y) = u_sol
-	(u_eol_x, u_eol_y) = u_eol
-
-	# unpack v; a circle is a center point and a radius (and a point is still an ordered pair of co-ordinates)
-	(v_ctr, v_rad) = v
-	(v_ctr_x, v_ctr_y) = v_ctr
-
-	# the equation for all points on the line segment u can be considered u = u_sol + t * (u_eol - u_sol), for t in [0, 1]
-	# the center of the circle and the nearest point on the line segment (that which we are trying to find) define a line 
-	# that is is perpendicular to the line segment u (i.e., the dot product will be 0); in other words, it suffices to take
-	# the equation v_ctr - (u_sol + t * (u_eol - u_sol)) · (u_evol - u_sol) and solve for t
-	
-	t = ((v_ctr_x - u_sol_x) * (u_eol_x - u_sol_x) + (v_ctr_y - u_sol_y) * (u_eol_y - u_sol_y)) / ((u_eol_x - u_sol_x) ** 2 + (u_eol_y - u_sol_y) ** 2)
-
-	# this t can be used to find the nearest point w on the infinite line between u_sol and u_sol, but the line is not 
-	# infinite so it is necessary to restrict t to a value in [0, 1]
-	t = max(min(t, 1), 0)
-	
-	# so the nearest point on the line segment, w, is defined as
-	w_x = u_sol_x + t * (u_eol_x - u_sol_x)
-	w_y = u_sol_y + t * (u_eol_y - u_sol_y)
-	
-	# Euclidean distance squared between w and v_ctr
-	d_sqr = (w_x - v_ctr_x) ** 2 + (w_y - v_ctr_y) ** 2
-	
-	# if the Euclidean distance squared is less than the radius squared
-	if (d_sqr <= v_rad ** 2):
-	
-		# the line collides
-		return True  # the point of collision is (int(w_x), int(w_y))
-		
-	else:
-	
-		# the line does not collide
-		return False
-
-	# visit http://ericleong.me/research/circle-line/ for a good supplementary resource on collision detection
 	
 #### ====================================================================================================================== ####
 #############                                            RENDER                                                    #############
@@ -200,7 +141,7 @@ def main():
 	# this game object is a line segment, with a single gap, rotating around a point
 	# the "origin" around which the line rotates,the current "angle" of the line the "length" intervals that specify the gap(s),
 	# the individual "segments" (i.e., non-gaps)
-	line = NPNG.Line([(arena.location),0,[(-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00)],[]])
+	line = NPNG.Line([(arena.location),0,[(-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00)],[],1])
 	
 	# this game object is a circular
 	player = NPNG.Player([((window_wid // 2)-100, (window_hgt // 2)+100),15,False])
