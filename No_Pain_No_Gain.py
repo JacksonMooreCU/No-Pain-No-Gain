@@ -11,7 +11,7 @@ from pygame.locals import *
 
 
 # the window is the actual window onto which the camera view is resized and blitted
-window_wid = 800
+window_wid = 1200
 window_hgt = 600
 
 # the frame rate is the number of frames per second that will be displayed and although
@@ -55,13 +55,15 @@ def main_game_update(rotating_line, circle_hitbox):
 	# increase the angle of the rotating line
 	rotating_line["ang"] = (rotating_line["ang"] + 1)
 
+	
 	# the rotating line angle ranges between 90 and 180 degrees
-	if rotating_line["ang"] > 180:
+	if rotating_line["ang"] > 359:
 
 		# when it reaches an angle of 180 degrees, reposition the circular hitbox
 		circle_hitbox["pos"] = (random.randint(0, window_wid), random.randint(0, window_hgt))
-		rotating_line["ang"] = 90
-		
+		rotating_line["ang"] = 0
+	
+
 	# the points associated with each line segment must be recalculated as the angle changes
 	rotating_line["seg"] = []
 	
@@ -195,14 +197,14 @@ def main():
 
 	# this game object is a line segment, with a single gap, rotating around a point
 	rotating_line = {}
-	rotating_line["ori"] = (window_wid, 0)                 # the "origin" around which the line rotates 
-	rotating_line["ang"] = 135                             # the current "angle" of the line
-	rotating_line["len"] = [ (0.00, 0.50), (0.75, 1.00) ]  # the "length" intervals that specify the gap(s)
-	rotating_line["seg"] = [ ]                             # the individual "segments" (i.e., non-gaps)
+	rotating_line["ori"] = (window_wid // 2, window_hgt // 2)			# the "origin" around which the line rotates 
+	rotating_line["ang"] = 0											# the current "angle" of the line
+	rotating_line["len"] = [ (-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00) ]# the "length" intervals that specify the gap(s)
+	rotating_line["seg"] = [ ]											# the individual "segments" (i.e., non-gaps)
 
 	# this game object is a circulr
 	circle_hitbox = {}
-	circle_hitbox["pos"] = (window_wid // 2, window_hgt // 2)
+	circle_hitbox["pos"] = ((window_wid // 2)- 50, (window_hgt // 2) - 50 )
 	circle_hitbox["rad"] = 30
 	circle_hitbox["col"] = False
 	
