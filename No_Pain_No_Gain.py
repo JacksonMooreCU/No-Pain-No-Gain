@@ -51,7 +51,7 @@ def quit():
 #### ====================================================================================================================== ####
 
 	
-def main_game_update(arena,rotating_line, circle_hitbox):
+def main_game_update(arena,rotating_line, player):
 
 	# increase the angle of the rotating line
 	rotating_line["ang"] = (rotating_line["ang"] + 1)
@@ -63,9 +63,9 @@ def main_game_update(arena,rotating_line, circle_hitbox):
 		# when it reaches an angle of 180 degrees, reposition the circular hitbox
 		print(arena.area[0])
 		print(0, window_wid)
-		circle_hitbox["pos"] = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
+		player.location = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
 		
-		print(">359",circle_hitbox["pos"])
+		print(">359",player.location)
 		rotating_line["ang"] = 0
 	
 
@@ -87,18 +87,18 @@ def main_game_update(arena,rotating_line, circle_hitbox):
 		rotating_line["seg"].append( ((sol_x, sol_y), (eol_x, eol_y)) )
 
 	# start by assuming that no collisions have occurred
-	circle_hitbox["col"] = False
+	player.collision = False
 	
 	# consider possible collisions between the circle hitbox and each line segment
 	for seg in rotating_line["seg"]:
 	
 		# if there is any collision at all, the circle hitbox flag is set
-		if detect_collision_line_circ(seg, (circle_hitbox["pos"], circle_hitbox["rad"])):
-			circle_hitbox["col"] = True
+		if detect_collision_line_circ(seg, (player.location, player.radius)):
+			player.collision = True
 			break
 
 	# return the new state of the rotating line and the circle hitbox
-	return rotating_line, circle_hitbox
+	return rotating_line, player
 	
 #############                                           HELPERS                                                    #############
 #### ---------------------------------------------------------------------------------------------------------------------- ####
@@ -132,7 +132,7 @@ def detect_collision_line_circ(u, v):
 	# Euclidean distance squared between w and v_ctr
 	d_sqr = (w_x - v_ctr_x) ** 2 + (w_y - v_ctr_y) ** 2
 	
-	# if the Eucliean distance squared is less than the radius squared
+	# if the Euclidean distance squared is less than the radius squared
 	if (d_sqr <= v_rad ** 2):
 	
 		# the line collides
@@ -160,7 +160,7 @@ def main_menu_render(window_sfc, start_button):
 	
 	start_button.render(window_sfc)
 	
-def main_game_render(arena,rotating_line, circle_hitbox, window_sfc):
+def main_game_render(arena,rotating_line, player, window_sfc):
 
 	# clear the window surface (by filling it with black)
 	window_sfc.fill( (0,0,0) )
@@ -173,13 +173,13 @@ def main_game_render(arena,rotating_line, circle_hitbox, window_sfc):
 		pygame.draw.aaline(window_sfc, (255, 255, 255), seg[0], seg[1])
 	
 	# draw the circle hitbox, in red if there has been a collision or in white otherwise
-	if circle_hitbox["col"]:
-		print("red",circle_hitbox["pos"])
-		pygame.draw.circle(window_sfc, (255, 0, 0), circle_hitbox["pos"], circle_hitbox["rad"])
+	if player.collision:
+		print("red",player.location)
+		pygame.draw.circle(window_sfc, (255, 0, 0), player.location, player.radius)
 		
 	else:
-		print("white",circle_hitbox["pos"])
-		pygame.draw.circle(window_sfc, (255, 255, 255), circle_hitbox["pos"], circle_hitbox["rad"])
+		print("white",player.location)
+		pygame.draw.circle(window_sfc, (255, 255, 255), player.location, player.radius)
 		
 #### ====================================================================================================================== ####
 #############                                             MAIN                                                     #############
@@ -215,10 +215,7 @@ def main():
 	rotating_line["seg"] = [ ]											# the individual "segments" (i.e., non-gaps)
 
 	# this game object is a circular
-	circle_hitbox = {}
-	circle_hitbox["pos"] = ((window_wid // 2)-100, (window_hgt // 2)+100)
-	circle_hitbox["rad"] = 15
-	circle_hitbox["col"] = False
+	player = NPNG.Player([((window_wid // 2)-100, (window_hgt // 2)+100),15,False])
 	
 	game_state = next_state
 	
@@ -245,7 +242,7 @@ def main():
 		#####################################################################################################
 		if (game_state == STATE_READY):
 		
-			rotating_line, circle_hitbox = main_game_update(arena,rotating_line, circle_hitbox) 
+			rotating_line, player = main_game_update(arena,rotating_line, player) 
 		
 		#####################################################################################################
 		# this is the "render" phase of the game loop, where a representation of the game world is displayed
@@ -257,7 +254,7 @@ def main():
 			
 		if (game_state == STATE_READY):
 		
-			main_game_render(arena,rotating_line, circle_hitbox, window_sfc)
+			main_game_render(arena,rotating_line, player, window_sfc)
 			
 		# update the display
 		pygame.display.update()
