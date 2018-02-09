@@ -53,6 +53,8 @@ def quit():
 	
 def main_game_update(arena,line, player):
 
+	
+
 	# increase the angle of the rotating line
 	line.angle = (line.angle + 1)
 
@@ -61,11 +63,9 @@ def main_game_update(arena,line, player):
 	if line.angle > 179:
 
 		# when it reaches an angle of 180 degrees, reposition the circular hitbox
-		print(arena.area[0])
-		print(0, window_wid)
-		player.location = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
 		
-		print(">359",player.location)
+		##player.location = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
+		
 		line.angle = 0
 	
 
@@ -198,14 +198,9 @@ def main():
 	
 
 	# this game object is a line segment, with a single gap, rotating around a point
+	# the "origin" around which the line rotates,the current "angle" of the line the "length" intervals that specify the gap(s),
+	# the individual "segments" (i.e., non-gaps)
 	line = NPNG.Line([(arena.location),0,[(-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00)],[]])
-	'''
-	rotating_line = {}
-	rotating_line["ori"] = (arena.location)			# the "origin" around which the line rotates 
-	rotating_line["ang"] = 0											# the current "angle" of the line
-	rotating_line["len"] = [ (-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00) ]# the "length" intervals that specify the gap(s)
-	rotating_line["seg"] = [ ]											# the individual "segments" (i.e., non-gaps)
-	'''
 	
 	# this game object is a circular
 	player = NPNG.Player([((window_wid // 2)-100, (window_hgt // 2)+100),15,False])
@@ -223,11 +218,12 @@ def main():
 		if (game_state == STATE_TITLE):
 			
 			closed_flag = quit()
-			if (start_button.clicked()):
+			if (start_button.clicked()[0]):
 				next_state = STATE_READY
 			
 		if (game_state == STATE_READY):
 		
+			player.check_moving(arena)
 			closed_flag = quit()
 		
 		#####################################################################################################
@@ -236,6 +232,7 @@ def main():
 		if (game_state == STATE_READY):
 		
 			line, player = main_game_update(arena,line, player) 
+			player.move(arena)
 		
 		#####################################################################################################
 		# this is the "render" phase of the game loop, where a representation of the game world is displayed
