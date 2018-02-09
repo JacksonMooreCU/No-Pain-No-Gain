@@ -47,3 +47,27 @@ class Player (Entity):
 		self.collision = data[2]
 		self.size = (data[0] * 2,data[0] * 2)
 		
+	def render (self, window_sfc):
+	
+		if self.collision:
+		
+			pygame.draw.circle(window_sfc, (255, 0, 0), self.location, self.radius)
+		
+		else:
+			
+			pygame.draw.circle(window_sfc, (255, 255, 255), self.location, self.radius)
+		
+class Line (Entity):
+	
+	def __init__(self, data):
+		self.type = "line"
+		self.location = data[0]
+		self.angle = data[1]
+		self.lengths = data[2]
+		self.segments = data[3]
+	
+	def render (self, window_sfc):
+		# draw each of the rotating line segments
+		for seg in self.segments:
+	
+			pygame.draw.aaline(window_sfc, (255, 255, 255), seg[0], seg[1])

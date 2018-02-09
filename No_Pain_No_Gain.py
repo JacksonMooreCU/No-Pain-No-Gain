@@ -51,14 +51,14 @@ def quit():
 #### ====================================================================================================================== ####
 
 	
-def main_game_update(arena,rotating_line, player):
+def main_game_update(arena,line, player):
 
 	# increase the angle of the rotating line
-	rotating_line["ang"] = (rotating_line["ang"] + 1)
+	line.angle = (line.angle + 1)
 
 	
 	# the rotating line angle ranges between 90 and 180 degrees
-	if rotating_line["ang"] > 179:
+	if line.angle > 179:
 
 		# when it reaches an angle of 180 degrees, reposition the circular hitbox
 		print(arena.area[0])
@@ -66,31 +66,31 @@ def main_game_update(arena,rotating_line, player):
 		player.location = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
 		
 		print(">359",player.location)
-		rotating_line["ang"] = 0
+		line.angle = 0
 	
 
 	# the points associated with each line segment must be recalculated as the angle changes
-	rotating_line["seg"] = []
+	line.segments = []
 	
 	# consider every line segment length
-	for len in rotating_line["len"]:
+	for len in line.lengths:
 	
 		# compute the start of the line...
-		sol_x = rotating_line["ori"][0] + math.cos(math.radians(rotating_line["ang"])) * arena.radius * len[0]
-		sol_y = rotating_line["ori"][1] + math.sin(math.radians(rotating_line["ang"])) * arena.radius * len[0]
+		sol_x = line.location[0] + math.cos(math.radians(line.angle)) * arena.radius * len[0]
+		sol_y = line.location[1] + math.sin(math.radians(line.angle)) * arena.radius * len[0]
 		
 		# ...and the end of the line...
-		eol_x = rotating_line["ori"][0] + math.cos(math.radians(rotating_line["ang"])) * arena.radius * len[1]
-		eol_y = rotating_line["ori"][1] + math.sin(math.radians(rotating_line["ang"])) * arena.radius * len[1]
+		eol_x = line.location[0] + math.cos(math.radians(line.angle)) * arena.radius * len[1]
+		eol_y = line.location[1] + math.sin(math.radians(line.angle)) * arena.radius * len[1]
 		
 		# ...and then add that line to the list
-		rotating_line["seg"].append( ((sol_x, sol_y), (eol_x, eol_y)) )
+		line.segments.append( ((sol_x, sol_y), (eol_x, eol_y)) )
 
 	# start by assuming that no collisions have occurred
 	player.collision = False
 	
 	# consider possible collisions between the circle hitbox and each line segment
-	for seg in rotating_line["seg"]:
+	for seg in line.segments:
 	
 		# if there is any collision at all, the circle hitbox flag is set
 		if detect_collision_line_circ(seg, (player.location, player.radius)):
@@ -98,7 +98,7 @@ def main_game_update(arena,rotating_line, player):
 			break
 
 	# return the new state of the rotating line and the circle hitbox
-	return rotating_line, player
+	return line, player
 	
 #############                                           HELPERS                                                    #############
 #### ---------------------------------------------------------------------------------------------------------------------- ####
@@ -160,26 +160,16 @@ def main_menu_render(window_sfc, start_button):
 	
 	start_button.render(window_sfc)
 	
-def main_game_render(arena,rotating_line, player, window_sfc):
+def main_game_render(arena,line, player, window_sfc):
 
 	# clear the window surface (by filling it with black)
 	window_sfc.fill( (0,0,0) )
 	
 	arena.render(window_sfc)
 	
-	# draw each of the rotating line segments
-	for seg in rotating_line["seg"]:
+	line.render(window_sfc)
 	
-		pygame.draw.aaline(window_sfc, (255, 255, 255), seg[0], seg[1])
-	
-	# draw the circle hitbox, in red if there has been a collision or in white otherwise
-	if player.collision:
-		print("red",player.location)
-		pygame.draw.circle(window_sfc, (255, 0, 0), player.location, player.radius)
-		
-	else:
-		print("white",player.location)
-		pygame.draw.circle(window_sfc, (255, 255, 255), player.location, player.radius)
+	player.render(window_sfc)
 		
 #### ====================================================================================================================== ####
 #############                                             MAIN                                                     #############
@@ -208,12 +198,15 @@ def main():
 	
 
 	# this game object is a line segment, with a single gap, rotating around a point
+	line = NPNG.Line([(arena.location),0,[(-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00)],[]])
+	'''
 	rotating_line = {}
 	rotating_line["ori"] = (arena.location)			# the "origin" around which the line rotates 
 	rotating_line["ang"] = 0											# the current "angle" of the line
 	rotating_line["len"] = [ (-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00) ]# the "length" intervals that specify the gap(s)
 	rotating_line["seg"] = [ ]											# the individual "segments" (i.e., non-gaps)
-
+	'''
+	
 	# this game object is a circular
 	player = NPNG.Player([((window_wid // 2)-100, (window_hgt // 2)+100),15,False])
 	
@@ -242,7 +235,7 @@ def main():
 		#####################################################################################################
 		if (game_state == STATE_READY):
 		
-			rotating_line, player = main_game_update(arena,rotating_line, player) 
+			line, player = main_game_update(arena,line, player) 
 		
 		#####################################################################################################
 		# this is the "render" phase of the game loop, where a representation of the game world is displayed
@@ -254,7 +247,7 @@ def main():
 			
 		if (game_state == STATE_READY):
 		
-			main_game_render(arena,rotating_line, player, window_sfc)
+			main_game_render(arena,line, player, window_sfc)
 			
 		# update the display
 		pygame.display.update()
