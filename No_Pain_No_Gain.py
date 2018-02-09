@@ -8,7 +8,8 @@ import random
 import math
 
 from pygame.locals import *
-
+pygame.font.init()	# you have to call this at the start, 
+					# if you want to use this module.
 
 # the window is the actual window onto which the camera view is resized and blitted
 window_wid = 1200
@@ -50,17 +51,21 @@ def quit():
 #### ====================================================================================================================== ####
 
 	
-def main_game_update(rotating_line, circle_hitbox):
+def main_game_update(arena,rotating_line, circle_hitbox):
 
 	# increase the angle of the rotating line
 	rotating_line["ang"] = (rotating_line["ang"] + 1)
 
 	
 	# the rotating line angle ranges between 90 and 180 degrees
-	if rotating_line["ang"] > 359:
+	if rotating_line["ang"] > 179:
 
 		# when it reaches an angle of 180 degrees, reposition the circular hitbox
-		circle_hitbox["pos"] = (random.randint(0, window_wid), random.randint(0, window_hgt))
+		print(arena.area[0])
+		print(0, window_wid)
+		circle_hitbox["pos"] = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
+		
+		print(">359",circle_hitbox["pos"])
 		rotating_line["ang"] = 0
 	
 
@@ -71,12 +76,12 @@ def main_game_update(rotating_line, circle_hitbox):
 	for len in rotating_line["len"]:
 	
 		# compute the start of the line...
-		sol_x = rotating_line["ori"][0] + math.cos(math.radians(rotating_line["ang"])) * window_wid * len[0]
-		sol_y = rotating_line["ori"][1] + math.sin(math.radians(rotating_line["ang"])) * window_wid * len[0]
+		sol_x = rotating_line["ori"][0] + math.cos(math.radians(rotating_line["ang"])) * arena.radius * len[0]
+		sol_y = rotating_line["ori"][1] + math.sin(math.radians(rotating_line["ang"])) * arena.radius * len[0]
 		
 		# ...and the end of the line...
-		eol_x = rotating_line["ori"][0] + math.cos(math.radians(rotating_line["ang"])) * window_wid * len[1]
-		eol_y = rotating_line["ori"][1] + math.sin(math.radians(rotating_line["ang"])) * window_wid * len[1]
+		eol_x = rotating_line["ori"][0] + math.cos(math.radians(rotating_line["ang"])) * arena.radius * len[1]
+		eol_y = rotating_line["ori"][1] + math.sin(math.radians(rotating_line["ang"])) * arena.radius * len[1]
 		
 		# ...and then add that line to the list
 		rotating_line["seg"].append( ((sol_x, sol_y), (eol_x, eol_y)) )
@@ -144,18 +149,23 @@ def detect_collision_line_circ(u, v):
 #############                                            RENDER                                                    #############
 #### ====================================================================================================================== ####
 	
-def main_menu_render(window_sfc):
+def main_menu_render(window_sfc, start_button):
 
 	# clear the window surface (by filling it with black)
 	window_sfc.fill( (255,0,0) )
-	print(window_sfc.get_width()/2)
 	
-	pygame.draw.rect(window_sfc, (0, 0, 0), (window_sfc.get_width()/2-50,window_sfc.get_height()/2-50)+(100,100), 0)
+	myfont = pygame.font.SysFont('Impact', 60)
+	textsurface = myfont.render('No Pain No Gain', False, (0, 0, 0))
+	window_sfc.blit(textsurface,(250, 100))
 	
-def main_game_render(rotating_line, circle_hitbox, window_sfc):
+	start_button.render(window_sfc)
+	
+def main_game_render(arena,rotating_line, circle_hitbox, window_sfc):
 
 	# clear the window surface (by filling it with black)
 	window_sfc.fill( (0,0,0) )
+	
+	arena.render(window_sfc)
 	
 	# draw each of the rotating line segments
 	for seg in rotating_line["seg"]:
@@ -164,11 +174,11 @@ def main_game_render(rotating_line, circle_hitbox, window_sfc):
 	
 	# draw the circle hitbox, in red if there has been a collision or in white otherwise
 	if circle_hitbox["col"]:
-	
+		print("red",circle_hitbox["pos"])
 		pygame.draw.circle(window_sfc, (255, 0, 0), circle_hitbox["pos"], circle_hitbox["rad"])
 		
 	else:
-	
+		print("white",circle_hitbox["pos"])
 		pygame.draw.circle(window_sfc, (255, 255, 255), circle_hitbox["pos"], circle_hitbox["rad"])
 		
 #### ====================================================================================================================== ####
@@ -194,18 +204,20 @@ def main():
 	# these are the initial game objects that are required (in some form) for the core mechanic provided
 	#####################################################################################################
 	start_button = NPNG.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
+	arena = NPNG.Arena([(250),((window_wid // 2), (window_hgt // 2)-50)])
+	
 
 	# this game object is a line segment, with a single gap, rotating around a point
 	rotating_line = {}
-	rotating_line["ori"] = (window_wid // 2, window_hgt // 2)			# the "origin" around which the line rotates 
+	rotating_line["ori"] = (arena.location)			# the "origin" around which the line rotates 
 	rotating_line["ang"] = 0											# the current "angle" of the line
 	rotating_line["len"] = [ (-1.00, -0.50),(-0.25, 0.25),(0.50, 1.00) ]# the "length" intervals that specify the gap(s)
 	rotating_line["seg"] = [ ]											# the individual "segments" (i.e., non-gaps)
 
-	# this game object is a circulr
+	# this game object is a circular
 	circle_hitbox = {}
-	circle_hitbox["pos"] = ((window_wid // 2)- 50, (window_hgt // 2) - 50 )
-	circle_hitbox["rad"] = 30
+	circle_hitbox["pos"] = ((window_wid // 2)-100, (window_hgt // 2)+100)
+	circle_hitbox["rad"] = 15
 	circle_hitbox["col"] = False
 	
 	game_state = next_state
@@ -233,23 +245,19 @@ def main():
 		#####################################################################################################
 		if (game_state == STATE_READY):
 		
-			rotating_line, circle_hitbox = main_game_update(rotating_line, circle_hitbox) 
+			rotating_line, circle_hitbox = main_game_update(arena,rotating_line, circle_hitbox) 
 		
 		#####################################################################################################
 		# this is the "render" phase of the game loop, where a representation of the game world is displayed
 		#####################################################################################################
 		if (game_state == STATE_TITLE):
 		
-			main_menu_render(window_sfc)
-			pygame.font.init() # you have to call this at the start, 
-							   # if you want to use this module.
-			myfont = pygame.font.SysFont('Impact', 60)
-			textsurface = myfont.render('No Pain No Gain', False, (0, 0, 0))
-			window_sfc.blit(textsurface,(250, 100))
+			main_menu_render(window_sfc,start_button)
+			
 			
 		if (game_state == STATE_READY):
 		
-			main_game_render(rotating_line, circle_hitbox, window_sfc)
+			main_game_render(arena,rotating_line, circle_hitbox, window_sfc)
 			
 		# update the display
 		pygame.display.update()

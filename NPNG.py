@@ -28,8 +28,37 @@ class Button(Entity):
 		self.location = data[0]
 		self.size = data[1]
 		#self.__clicked = False
-		
+	
 	'''
 	def get_clicked(self):
 		return self.__clicked
 	'''	
+	
+	def render(self, window_sfc):
+		pygame.draw.rect(window_sfc, (0, 0, 0), (window_sfc.get_width()/2-50,window_sfc.get_height()/2-50)+(100,100), 0)
+		
+class Arena(Entity):
+
+	def __init__(self, data):
+		self.type = "arena"
+		self.radius = data[0]
+		self.diameter = data[0] * 2
+		self.location = data[1]
+		self.size = (data[0] * 2,data[0] * 2)
+		self.area = (((self.location[0] - self.radius),(self.location[0] + self.radius)),((self.location[1] - self.radius),(self.location[1] + self.radius)))
+		
+	def diameter(self):
+		return self.diameter
+		
+	def radius(self):
+		return self.radius
+		
+	def location(self):
+		return self.location
+		
+	def area(self):
+		return self.area
+		
+	def render(self, window_sfc):	
+		pygame.draw.circle(window_sfc, (0, 255, 0), self.location, self.radius)
+		
