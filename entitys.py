@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import pygame
-import Screen
+import screens
 import random
 import math
 #No Pain No Gain Class Files

@@ -143,6 +143,9 @@ def main():
 	continue_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	cutscene = screens.Screen(["cutscene",continue_button,"No Input",None,1])
 	
+	play_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
+	room = screens.Screen(["room",play_button,"No Input",None,3])
+	
 	
 
 	# this game object is a line segment, with a single gap, rotating around a point
@@ -180,17 +183,20 @@ def main():
 			
 		elif (game_state == STATE_CUTSCENE):
 		
-			if(cutscene.check_button(arena)):
-				print("next scene")
+			if(cutscene.check_button()):
 				next_state = cutscene.next_screen
 			closed_flag = quit()
+			
+		elif (game_state == STATE_ROOM):
 		
+			if(room.check_button()):
+				next_state = room.next_screen
+			closed_flag = quit()
 		#####################################################################################################
 		# this is the "update" phase of the game loop, where the changes to the game world are handled
 		#####################################################################################################
 		if (game_state == STATE_GAME):
 		
-			
 			line, player, goal = main_game_update(arena,line, player,goal) 
 			player.move(arena)
 			#check if the player won
@@ -206,7 +212,7 @@ def main():
 		
 		elif (game_state == STATE_ROOM):
 		
-			menu_screen_render(window_sfc,buttons)
+			room.render(window_sfc)
 			
 		elif (game_state == STATE_GAME):
 		

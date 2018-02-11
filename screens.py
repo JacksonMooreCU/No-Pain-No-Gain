@@ -22,11 +22,8 @@ class Screen :
 		
 		self.button.render(window_sfc)
 		
-	def check_button (self,arena):
-		print("inside check")
+	def check_button (self):
 		if (self.button.clicked()[0]):
-			print("return true")
 			return True
 		else:
-			print("return False")
 			return False
