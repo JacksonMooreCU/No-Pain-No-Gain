@@ -36,84 +36,16 @@ STATE_END = 9
 #############                                           PROCESS                                                    #############
 #### ====================================================================================================================== ####
 
-	
-def quit():
-
-	# look in the event queue for the quit event
-	quit_ocrd = False
-	for event in pygame.event.get():
-		if event.type == QUIT:
-			quit_ocrd = True
-		
-		if event.type == pygame.KEYDOWN:
-			if(pygame.K_ESCAPE == event.key):
-				quit_ocrd = True
-		
-	return quit_ocrd
-
 #### ====================================================================================================================== ####
 #############                                            UPDATE                                                    #############
 #### ====================================================================================================================== ####
-
-	
-def main_game_update(arena,line, player,goal):
-
-	# increase the angle of the rotating line
-	line.move_line()
-
-	# the rotating line angle ranges between 90 and 180 degrees
-	if line.angle > 179:
-
-		# when it reaches an angle of 180 degrees, reposition the circular hitbox
-		
-		##player.location = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
-		goal.new(arena)
-		line.angle = 0
-	
-	# consider every line segment length
-	line.compute(arena)
-	
-	# consider possible collisions between the circle hitbox and each line segment
-	line.check_collision(player)
-	
-	#check if player got a point
-	player.check_goal(goal,arena)
-
-	# return the new state of the rotating line and the circle hitbox
-	return line, player, goal
 	
 #############                                           HELPERS                                                    #############
 #### ---------------------------------------------------------------------------------------------------------------------- ####
-
-
 	
 #### ====================================================================================================================== ####
 #############                                            RENDER                                                    #############
 #### ====================================================================================================================== ####
-	
-def tittle_screen_render(window_sfc, start_button):
-
-	# clear the window surface (by filling it with black)
-	window_sfc.fill( (255,0,0) )
-	
-	myfont = pygame.font.SysFont('Impact', 60)
-	textsurface = myfont.render('No Pain No Gain', False, (0, 0, 0))
-	window_sfc.blit(textsurface,(250, 100))
-	
-	start_button.render(window_sfc)
-	
-def main_game_render(arena,line, player,goal, window_sfc):
-
-	# clear the window surface (by filling it with black)
-	window_sfc.fill( (0,0,0) )
-	
-	arena.render(window_sfc)
-	
-	line.render(window_sfc)
-	
-	goal.render(window_sfc)
-	
-	player.render(window_sfc)
 	
 #### ====================================================================================================================== ####
 #############                                             MAIN                                                     #############
@@ -138,26 +70,30 @@ def main():
 	# these are the initial game objects that are required (in some form) for the core mechanic provided
 	#####################################################################################################
 	start_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
-	arena = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),10])
+	title = screens.Screen(["tittle",start_button,"No Pain No Gain",None,3])
+	
+	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),10])
 	
 	continue_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	cutscene = screens.Screen(["cutscene",continue_button,"No Input",None,1])
 	
 	play_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	room = screens.Screen(["room",play_button,"No Input",None,3])
-	
-	
 
 	# this game object is a line segment, with a single gap, rotating around a point
 	# the "origin" around which the line rotates,the current "angle" of the line the "length" intervals that specify the gap(s),
 	# the individual "segments" (i.e., non-gaps)
-	line = entitys.Line([(arena.location),0,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
+	line0 = entitys.Line([(arena0.location),0,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
+	line1 = entitys.Line([(arena0.location),0,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,-1])
 	
 	# this game object is a circular
 	player = entitys.Player([((window_wid // 2)-100, (window_hgt // 2)+100)])
 	
 	#the is a goal for the player to touch to receive points
-	goal = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena)
+	goal0 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
+	
+	#battle 0 screen
+	battle0 = screens.Battle(["battle",arena0,[line0,line1],goal0])
 
 	
 	game_state = next_state
@@ -172,14 +108,14 @@ def main():
 		#####################################################################################################
 		if (game_state == STATE_TITLE):
 			
-			closed_flag = quit()
-			if (start_button.clicked()[0]):
+			closed_flag = title.quit()
+			if (title.check_button()):
 				next_state = STATE_GAME
 			
 		elif (game_state == STATE_GAME):
 		
-			player.check_moving(arena)
-			closed_flag = quit()
+			player.check_moving(battle0.arena)
+			closed_flag = battle0.quit()
 			
 		elif (game_state == STATE_CUTSCENE):
 		
@@ -191,16 +127,17 @@ def main():
 		
 			if(room.check_button()):
 				next_state = room.next_screen
-			closed_flag = quit()
+			closed_flag = room.quit()
+			
 		#####################################################################################################
 		# this is the "update" phase of the game loop, where the changes to the game world are handled
 		#####################################################################################################
 		if (game_state == STATE_GAME):
-		
-			line, player, goal = main_game_update(arena,line, player,goal) 
-			player.move(arena)
+	
+			battle0.update(player)
+			
 			#check if the player won
-			if (arena.check(player,cutscene)):
+			if (battle0.arena.check(player,cutscene)):
 				next_state = STATE_CUTSCENE
 		
 		#####################################################################################################
@@ -208,7 +145,7 @@ def main():
 		#####################################################################################################
 		if (game_state == STATE_TITLE):
 		
-			tittle_screen_render(window_sfc,start_button)
+			title.render(window_sfc)
 		
 		elif (game_state == STATE_ROOM):
 		
@@ -216,7 +153,7 @@ def main():
 			
 		elif (game_state == STATE_GAME):
 		
-			main_game_render(arena,line, player,goal, window_sfc)
+			battle0.render(player,window_sfc)
 			
 		elif (game_state == STATE_CUTSCENE):
 		
