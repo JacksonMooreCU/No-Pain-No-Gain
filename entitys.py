@@ -30,7 +30,7 @@ class Button(Entity):
 			return False, (mouseX, mouseY)
 	
 	def render(self, window_sfc):
-		pygame.draw.rect(window_sfc, (0, 0, 255), (window_sfc.get_width()/2-50,window_sfc.get_height()/2-50)+(100,100), 0)
+		pygame.draw.rect(window_sfc, (0, 0, 255), (self.location)+(100,100), 0)
 		
 class Arena(Entity):
 
@@ -57,13 +57,20 @@ class Arena(Entity):
 	def check(self,player,cutscene):
 		#if the player has enough points for the arena they are in
 		if(player.points >= self.score):
+			player.points = 0; 			# reset the players points
 			cutscene.text = "You win!" #In the cutscene show that the player won
+			if (player.training_mode):
+				cutscene.text += " You gained 1 speed level!"
+				player.speed_level += 1
+			else:
+				cutscene.text += " You gained 1 rank!"
+				player.rank -= 1
 			cutscene.next_screen = 2 #then go to the room
 			return True #return true for the battle is over
 		#if the player has no more health left
 		elif(player.health <= 0):
 			cutscene.text = "You lose!"#in the cutscene show that the player lost
-			cutscene.next_screen = 0 #then go back to the main menu
+			cutscene.next_screen = 99 #re run the game
 			return True#return true for the battle is over
 		else:
 			return False#return false since the battle is not over
@@ -83,6 +90,9 @@ class Player (Entity):
 		self.health = 100
 		self.velocity = None
 		self.points = 0
+		self.days = 0
+		self.rank = 5
+		self.training_mode = False
 		
 	def render (self, window_sfc):
 	

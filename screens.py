@@ -13,7 +13,7 @@ class Screen :
 		self.next_screen = data[4]
 		
 	def render (self, window_sfc):
-		print("render")
+	
 		# clear the window surface (by filling it with black)
 		window_sfc.fill( (255,0,0) )
 	
@@ -32,15 +32,18 @@ class Screen :
 	def quit(self):
 
 		# look in the event queue for the quit event
+		
 		quit_ocrd = False
 		for event in pygame.event.get():
 			if event.type == QUIT:
+				print("quit")
 				quit_ocrd = True
 			
 			if event.type == pygame.KEYDOWN:
 				if(pygame.K_ESCAPE == event.key):
+					print("quit")
 					quit_ocrd = True
-			
+				
 		return quit_ocrd
 			
 class Battle (Screen):
@@ -92,3 +95,42 @@ class Battle (Screen):
 		player.move(self.arena)
 		# return the new state of the rotating line and the circle hitbox
 		#return line, player, goal
+		
+class Menu (Screen):
+
+	def __init__(self,data):
+		self.type = data[0]
+		self.buttons = data[1]
+		self.text = data[2]
+		self.next_screens = data[3]
+		self.clicked = None
+		self.next_screen = None
+		
+	def render (self,player, window_sfc):
+	
+		# clear the window surface (by filling it with black)
+		window_sfc.fill( (255,0,0) )
+		
+		myfont = pygame.font.SysFont('Impact', 30)
+		self.text = "Battle, Train, or Rest? HP: "+str(player.health)+" Days: "+str(player.days)+" Rank: "+str(player.rank)
+		textsurface = myfont.render(self.text, False, (0, 0, 255))
+		window_sfc.blit(textsurface,(100, 50))
+		
+		for button in self.buttons:
+			button.render(window_sfc)
+			
+	def check_buttons(self,player):
+		
+		for x in range(len(self.buttons)):
+		
+			if (self.buttons[x].clicked()[0]):
+			
+				self.clicked = x
+				self.next_screen = self.next_screens[self.clicked]
+				player.days += 1
+				if(x==2 and player.health <=90): player.health+= 10
+				elif(x==1): player.training_mode=True
+				elif(x==0): player.training_mode=False
+				return True
+				
+		return False

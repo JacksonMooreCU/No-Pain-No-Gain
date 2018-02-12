@@ -29,23 +29,7 @@ STATE_CUTSCENE = 1
 STATE_ROOM = 2
 STATE_GAME = 3
 STATE_WIN = 4
-STATE_REST = 5
-STATE_END = 9
-
-#### ====================================================================================================================== ####
-#############                                           PROCESS                                                    #############
-#### ====================================================================================================================== ####
-
-#### ====================================================================================================================== ####
-#############                                            UPDATE                                                    #############
-#### ====================================================================================================================== ####
-	
-#############                                           HELPERS                                                    #############
-#### ---------------------------------------------------------------------------------------------------------------------- ####
-	
-#### ====================================================================================================================== ####
-#############                                            RENDER                                                    #############
-#### ====================================================================================================================== ####
+STATE_END = 99
 	
 #### ====================================================================================================================== ####
 #############                                             MAIN                                                     #############
@@ -77,8 +61,10 @@ def main():
 	continue_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	cutscene = screens.Screen(["cutscene",continue_button,"No Input",None,1])
 	
-	play_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
-	room = screens.Screen(["room",play_button,"No Input",None,3])
+	battle_button = entitys.Button([(window_sfc.get_width()/2-200,window_sfc.get_height()/2-100),(100,100)])
+	train_button = entitys.Button([(window_sfc.get_width()/2,window_sfc.get_height()/2-100),(100,100)])
+	sleep_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
+	room = screens.Menu(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,2]])
 
 	# this game object is a line segment, with a single gap, rotating around a point
 	# the "origin" around which the line rotates,the current "angle" of the line the "length" intervals that specify the gap(s),
@@ -110,22 +96,24 @@ def main():
 			
 			closed_flag = title.quit()
 			if (title.check_button()):
-				next_state = STATE_GAME
+				next_state = STATE_ROOM
 			
 		elif (game_state == STATE_GAME):
 		
 			player.check_moving(battle0.arena)
 			closed_flag = battle0.quit()
+		
 			
 		elif (game_state == STATE_CUTSCENE):
 		
 			if(cutscene.check_button()):
 				next_state = cutscene.next_screen
-			closed_flag = quit()
+				
+			closed_flag = cutscene.quit()
 			
 		elif (game_state == STATE_ROOM):
 		
-			if(room.check_button()):
+			if(room.check_buttons(player)):
 				next_state = room.next_screen
 			closed_flag = room.quit()
 			
@@ -139,6 +127,10 @@ def main():
 			#check if the player won
 			if (battle0.arena.check(player,cutscene)):
 				next_state = STATE_CUTSCENE
+				
+		# if the player lost exit loop
+		if (game_state == STATE_END): 
+			closed_flag = True
 		
 		#####################################################################################################
 		# this is the "render" phase of the game loop, where a representation of the game world is displayed
@@ -149,7 +141,7 @@ def main():
 		
 		elif (game_state == STATE_ROOM):
 		
-			room.render(window_sfc)
+			room.render(player,window_sfc)
 			
 		elif (game_state == STATE_GAME):
 		
@@ -168,6 +160,8 @@ def main():
 		# enforce the minimum frame rate
 		clock.tick(frame_rate)
 		
-		
+	# if the player lost re run the game
+	if (game_state == STATE_END): 
+		main()
 if __name__ == "__main__":
 	main()
