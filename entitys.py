@@ -65,6 +65,7 @@ class Arena(Entity):
 			else:
 				cutscene.text += " You gained 1 rank!"
 				player.rank -= 1
+				player.level += 1
 			cutscene.next_screen = 2 #then go to the room
 			return True #return true for the battle is over
 		#if the player has no more health left
@@ -92,6 +93,7 @@ class Player (Entity):
 		self.points = 0
 		self.days = 0
 		self.rank = 5
+		self.level = 0
 		self.training_mode = False
 		
 	def render (self, window_sfc):
@@ -170,11 +172,13 @@ class Line (Entity):
 	def __init__(self, data):
 		self.type = "line"
 		self.location = data[0]
-		self.angle = data[1]
-		self.lengths = data[2]
-		self.segments = data[3]
-		self.damage = data[4]
-		self.speed = data[5]
+		self.origin = data[1]
+		self.angle = self.origin
+		self.rotaion = data[2]
+		self.lengths = data[3]
+		self.segments = data[4]
+		self.damage = data[5]
+		self.speed = data[6]
 	
 	def render (self, window_sfc):
 		# draw each of the rotating line segments

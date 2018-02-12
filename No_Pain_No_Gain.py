@@ -56,7 +56,7 @@ def main():
 	start_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	title = screens.Screen(["tittle",start_button,"No Pain No Gain",None,3])
 	
-	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),10])
+	
 	
 	continue_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	cutscene = screens.Screen(["cutscene",continue_button,"No Input",None,1])
@@ -66,21 +66,22 @@ def main():
 	sleep_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
 	room = screens.Menu(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,2]])
 
-	# this game object is a line segment, with a single gap, rotating around a point
-	# the "origin" around which the line rotates,the current "angle" of the line the "length" intervals that specify the gap(s),
-	# the individual "segments" (i.e., non-gaps)
-	line0 = entitys.Line([(arena0.location),0,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
-	line1 = entitys.Line([(arena0.location),0,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,-1])
+	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),10])
+	line0a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
+	line0b = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,-1])
+	goal0 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
+	battle0 = screens.Battle(["battle",arena0,[line0a,line0b],goal0])
+	
+	arena1 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),12])
+	line1a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],2,2])
+	line1b = entitys.Line([(arena0.location),0,360,[(-1.00, -0.80),(-0.50, 0.50),(0.80, 1.00)],[],2,-2])
+	goal1 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
+	battle1 = screens.Battle(["battle",arena1,[line1a,line1b],goal1])
+
+	battles = [battle0,battle1]
 	
 	# this game object is a circular
 	player = entitys.Player([((window_wid // 2)-100, (window_hgt // 2)+100)])
-	
-	#the is a goal for the player to touch to receive points
-	goal0 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
-	
-	#battle 0 screen
-	battle0 = screens.Battle(["battle",arena0,[line0,line1],goal0])
-
 	
 	game_state = next_state
 	
@@ -100,8 +101,8 @@ def main():
 			
 		elif (game_state == STATE_GAME):
 		
-			player.check_moving(battle0.arena)
-			closed_flag = battle0.quit()
+			player.check_moving(battles[player.level].arena)
+			closed_flag = battles[player.level].quit()
 		
 			
 		elif (game_state == STATE_CUTSCENE):
@@ -122,10 +123,10 @@ def main():
 		#####################################################################################################
 		if (game_state == STATE_GAME):
 	
-			battle0.update(player)
+			battles[player.level].update(player)
 			
 			#check if the player won
-			if (battle0.arena.check(player,cutscene)):
+			if (battles[player.level].arena.check(player,cutscene)):
 				next_state = STATE_CUTSCENE
 				
 		# if the player lost exit loop
@@ -145,7 +146,7 @@ def main():
 			
 		elif (game_state == STATE_GAME):
 		
-			battle0.render(player,window_sfc)
+			battles[player.level].render(player,window_sfc)
 			
 		elif (game_state == STATE_CUTSCENE):
 		
@@ -163,5 +164,6 @@ def main():
 	# if the player lost re run the game
 	if (game_state == STATE_END): 
 		main()
+		
 if __name__ == "__main__":
 	main()

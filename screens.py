@@ -81,7 +81,7 @@ class Battle (Screen):
 				
 				##player.location = (random.randint(arena.area[0][0],arena.area[0][1]),random.randint(arena.area[1][0],arena.area[1][1]))
 				self.goal.new(self.arena)
-				line.angle = 0
+				line.angle = line.origin
 			
 			# consider every line segment length
 			line.compute(self.arena)
