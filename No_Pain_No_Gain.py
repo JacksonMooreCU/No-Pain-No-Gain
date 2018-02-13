@@ -66,22 +66,32 @@ def main():
 	sleep_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
 	room = screens.Menu(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,2]])
 
-	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),10])
-	line0a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
-	line0b = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,-1])
-	goal0 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
-	battle0 = screens.Battle(["battle",arena0,[line0a,line0b],goal0])
+	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),4,0])
+	line0a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,0])
+	goal0 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,1],arena0)
+	battle0 = screens.Battle(["battle",arena0,[line0a],goal0])
 	
-	arena1 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),12])
-	line1a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],2,2])
-	line1b = entitys.Line([(arena0.location),0,360,[(-1.00, -0.80),(-0.50, 0.50),(0.80, 1.00)],[],2,-2])
-	goal1 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
-	battle1 = screens.Battle(["battle",arena1,[line1a,line1b],goal1])
+	arena1 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),4,1])
+	line1a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
+	goal1 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,1],arena0)
+	battle1 = screens.Battle(["battle",arena1,[line1a],goal1])
+	
+	arena2 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),10,2])
+	line2a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
+	line2b = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,-1])
+	goal2 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
+	battle2 = screens.Battle(["battle",arena2,[line2a,line2b],goal2])
+	
+	arena3 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),15,4])
+	line3a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],2,2])
+	line3b = entitys.Line([(arena0.location),0,360,[(-1.00, -0.80),(-0.50, 0.50),(0.80, 1.00)],[],2,-2])
+	goal3 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,3],arena0)
+	battle3 = screens.Battle(["battle",arena3,[line3a,line3b],goal3])
 
-	battles = [battle0,battle1]
+	battles = [battle0,battle1,battle2,battle3]
 	
 	# this game object is a circular
-	player = entitys.Player([((window_wid // 2)-100, (window_hgt // 2)+100)])
+	player = entitys.Player([((window_wid // 2), (window_hgt // 2)+100)])
 	
 	game_state = next_state
 	

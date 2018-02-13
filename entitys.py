@@ -42,6 +42,7 @@ class Arena(Entity):
 		self.size = (data[0] * 2,data[0] * 2)
 		self.area = (((self.location[0] - self.radius),(self.location[0] + self.radius)),((self.location[1] - self.radius),(self.location[1] + self.radius)))
 		self.score = data[2]
+		self.value = data[3]
 	
 	def clicked(self):
 		(mouseX, mouseY) = pygame.mouse.get_pos()
@@ -60,8 +61,8 @@ class Arena(Entity):
 			player.points = 0; 			# reset the players points
 			cutscene.text = "You win!" #In the cutscene show that the player won
 			if (player.training_mode):
-				cutscene.text += " You gained 1 speed level!"
-				player.speed_level += 1
+				cutscene.text += " You gained"+str(self.score)+"points!"
+				player.money += self.score
 			else:
 				cutscene.text += " You gained 1 rank!"
 				player.rank -= 1
@@ -87,12 +88,15 @@ class Player (Entity):
 		self.destination = data[0]
 		self.moving = False
 		self.speed = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10]
-		self.speed_level = 4
-		self.health = 100
+		self.health_levels= [100,110,120,130,140,150,160,170,180,190,200]
+		self.speed_level = 0
+		self.health_level = 0
+		self.health = self.health_levels(self.health_level)
 		self.velocity = None
 		self.points = 0
+		self.money = 0
 		self.days = 0
-		self.rank = 5
+		self.rank = 100
 		self.level = 0
 		self.training_mode = False
 		
