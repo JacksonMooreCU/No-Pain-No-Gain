@@ -3,6 +3,7 @@ import pygame
 import screens
 import random
 import math
+import time
 #No Pain No Gain Class Files
 
 class Entity :
@@ -25,6 +26,7 @@ class Button(Entity):
 		
 		(mouseX, mouseY) = pygame.mouse.get_pos()
 		if(mouseX<self.location[0]+self.size[0] and mouseX>self.location[0] and mouseY<self.location[1]+self.size[1] and mouseY>self.location[1] and pygame.mouse.get_pressed()[0]):
+			time.sleep(0.1)
 			return True, (mouseX, mouseY)
 		else:	
 			return False, (mouseX, mouseY)

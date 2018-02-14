@@ -60,14 +60,14 @@ def main():
 	continue_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	cutscene = screens.Screen(["cutscene",continue_button,"No Input",None,1])
 	
-	battle_button = entitys.Button([(window_sfc.get_width()/2-200,window_sfc.get_height()/2-100),(100,100)])
-	train_button = entitys.Button([(window_sfc.get_width()/2,window_sfc.get_height()/2-100),(100,100)])
-	sleep_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
+	battle_button = entitys.Button([(window_sfc.get_width()/2-250,window_sfc.get_height()/2-50),(100,100)])
+	train_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
+	sleep_button = entitys.Button([(window_sfc.get_width()/2+150,window_sfc.get_height()/2-50),(100,100)])
 	room = screens.Room(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,4]])
 
-	speed_button = entitys.Button([(window_sfc.get_width()/2-200,window_sfc.get_height()/2-100),(100,100)])
-	health_button = entitys.Button([(window_sfc.get_width()/2,window_sfc.get_height()/2-100),(100,100)])
-	max_health_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
+	speed_button = entitys.Button([(window_sfc.get_width()/2-200,window_sfc.get_height()/2-50),(100,100)])
+	health_button = entitys.Button([(window_sfc.get_width()/2,window_sfc.get_height()/2-50),(100,100)])
+	max_health_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-50),(100,100)])
 	back_button = entitys.Button([(window_sfc.get_width()/2-550,window_sfc.get_height()/2-250),(50,50)])
 	store = screens.Store(["store",[speed_button,health_button,max_health_button,back_button],"Speed, Health, or Max Health?",[4,4,4,2]])
 	

@@ -110,11 +110,14 @@ class Battle (Screen):
 				player.rank -= 1
 				player.level += 1
 			cutscene.next_screen = 2 #then go to the room
+			#reset variables
 			player.destination = None
 			player.velocity = None
 			player.moving = False
 			player.location = (self.arena.location[0],self.arena.location[1]+(self.arena.radius//2))
 			player.int_location = (self.arena.location[0],self.arena.location[1]+(self.arena.radius//2))
+			for line in self.lines:
+				line.angle = line.origin
 			return True #return true for the battle is over
 		#if the player has no more health left
 		elif(player.health <= 0):
@@ -200,7 +203,6 @@ class Store (Screen):
 			
 				self.clicked = x
 				self.next_screen = self.next_screens[self.clicked]
-				player.days += 1
 				if(x==0 and player.money>=player.speed_cost[player.speed_level]): 
 					player.money -= player.speed_cost[player.speed_level]
 					player.speed_level+= 1
@@ -209,7 +211,7 @@ class Store (Screen):
 					player.money -= player.max_health_cost[player.health_level]
 					player.health_level+= 1
 					
-				if(x==1 and player.money>=player.health_cost and player.health<=100): 
+				if(x==1 and player.money>=player.health_cost and player.health<100): 
 					player.money -= player.health_cost
 					player.health+= 1
 				return True
