@@ -54,29 +54,7 @@ class Arena(Entity):
 	
 	def render(self, window_sfc):	
 		pygame.draw.circle(window_sfc, (0, 255, 0), self.location, self.radius)
-		
-	def check(self,player,cutscene):
-		#if the player has enough points for the arena they are in
-		if(player.points >= self.score):
-			player.points = 0; 			# reset the players points
-			cutscene.text = "You win!" #In the cutscene show that the player won
-			if (player.training_mode):
-				cutscene.text += " You gained"+str(self.score)+"points!"
-				player.money += self.score
-			else:
-				cutscene.text += " You gained 1 rank!"
-				player.rank -= 1
-				player.level += 1
-			cutscene.next_screen = 2 #then go to the room
-			return True #return true for the battle is over
-		#if the player has no more health left
-		elif(player.health <= 0):
-			cutscene.text = "You lose!"#in the cutscene show that the player lost
-			cutscene.next_screen = 99 #re run the game
-			return True#return true for the battle is over
-		else:
-			return False#return false since the battle is not over
-		
+
 class Player (Entity):
 	
 	def __init__(self, data):
@@ -89,26 +67,28 @@ class Player (Entity):
 		self.moving = False
 		self.speed = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10]
 		self.health_levels= [100,110,120,130,140,150,160,170,180,190,200]
-		self.speed_level = 0
+		self.speed_level = 4
 		self.health_level = 0
-		self.health = self.health_levels(self.health_level)
+		self.health = self.health_levels[self.health_level]
 		self.velocity = None
 		self.points = 0
 		self.money = 0
 		self.days = 0
 		self.rank = 100
 		self.level = 0
+		pos = list(self.location)
+		self.int_location = (int(pos[0]),int(pos[1]))
 		self.training_mode = False
 		
 	def render (self, window_sfc):
 	
 		if self.collision:
 		
-			pygame.draw.circle(window_sfc, (255, 0, 0), self.location, self.radius)
+			pygame.draw.circle(window_sfc, (255, 0, 0), self.int_location, self.radius)
 		
 		else:
 			
-			pygame.draw.circle(window_sfc, (255, 255, 255), self.location, self.radius)
+			pygame.draw.circle(window_sfc, (255, 255, 255), self.int_location, self.radius)
 			
 		stats = "Health: "+str(self.health)+" Speed: "+str(self.speed_level)+" Score: "+str(self.points)
 				
@@ -122,23 +102,26 @@ class Player (Entity):
 			self.destination = arena.clicked()[1]
 			pos = self.location
 			target = self.destination
-			self.velocity = ((target[0]-pos[0])*self.speed[self.speed_level],(target[1]-pos[1])*self.speed[self.speed_level])
 			self.moving = True
 			
 			
 	def move(self,arena):
 		perimeter = arena.location
+		print("d:",self.destination,"l:",self.location)
 		pos = list(self.location)
 		if (self.moving):
 		
-			target = pos[0]<self.destination[0]+10 and pos[0]>self.destination[0]-10 and pos[1]<self.destination[1]+10 and pos[1]>self.destination[1]-10
+			target = pos[0]<self.destination[0] and pos[0]>self.destination[0] and pos[1]<self.destination[1] and pos[1]>self.destination[1]
 			bounds = pos[0]<perimeter[0]+arena.radius and pos[0]>perimeter[0]-arena.radius and pos[1]<perimeter[1]+arena.radius and pos[1]>perimeter[1]-arena.radius
-		
-		
+
 			if(bounds and not target):
+				x = (self.destination[0]-pos[0])*self.speed[self.speed_level]
+				y = (self.destination[1]-pos[1])*self.speed[self.speed_level]
+				self.velocity=(x,y)
 				pos[0] += self.velocity[0]
 				pos[1] += self.velocity[1]
-				self.location = (int(pos[0]),int(pos[1]))
+				self.location = (pos[0],pos[1])
+				self.int_location = (int(round(pos[0])),int(round(pos[1])))
 				
 			else:
 				self.destination = None

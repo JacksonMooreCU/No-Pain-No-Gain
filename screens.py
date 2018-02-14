@@ -96,6 +96,29 @@ class Battle (Screen):
 		# return the new state of the rotating line and the circle hitbox
 		#return line, player, goal
 		
+	def check(self,player,cutscene):
+	
+		#if the player has enough points for the arena they are in
+		if(player.points >= self.arena.score):
+			player.points = 0; 			# reset the players points
+			cutscene.text = "You win!" #In the cutscene show that the player won
+			if (player.training_mode):
+				cutscene.text += " You gained"+str(self.arena.score)+"points!"
+				player.money += self.arena.score
+			else:
+				cutscene.text += " You gained 1 rank!"
+				player.rank -= 1
+				player.level += 1
+			cutscene.next_screen = 2 #then go to the room
+			return True #return true for the battle is over
+		#if the player has no more health left
+		elif(player.health <= 0):
+			cutscene.text = "You lose!"#in the cutscene show that the player lost
+			cutscene.next_screen = 99 #re run the game
+			return True#return true for the battle is over
+		else:
+			return False#return false since the battle is not over
+		
 class Menu (Screen):
 
 	def __init__(self,data):

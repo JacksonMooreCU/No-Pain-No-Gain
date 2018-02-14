@@ -19,7 +19,7 @@ window_hgt = 600
 # the frame rate is the number of frames per second that will be displayed and although
 # we could (and should) measure the amount of time elapsed, for the sake of simplicity
 # we will make the (not unreasonable) assumption that this "delta time" is always 1/fps
-frame_rate = 40
+frame_rate = 20
 delta_time = 1 / frame_rate
 
 
@@ -66,32 +66,32 @@ def main():
 	sleep_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
 	room = screens.Menu(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,2]])
 
-	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),4,0])
+	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)),4,0])
 	line0a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,0])
-	goal0 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,1],arena0)
+	goal0 = entitys.Goal([(arena0.location),10,False,1],arena0)
 	battle0 = screens.Battle(["battle",arena0,[line0a],goal0])
 	
 	arena1 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),4,1])
-	line1a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
-	goal1 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,1],arena0)
+	line1a = entitys.Line([(arena1.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
+	goal1 = entitys.Goal([(arena1.location),10,False,1],arena1)
 	battle1 = screens.Battle(["battle",arena1,[line1a],goal1])
 	
 	arena2 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),10,2])
-	line2a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
-	line2b = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,-1])
-	goal2 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,2],arena0)
+	line2a = entitys.Line([(arena2.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,1])
+	line2b = entitys.Line([(arena2.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,-1])
+	goal2 = entitys.Goal([(arena2.location),10,False,2],arena2)
 	battle2 = screens.Battle(["battle",arena2,[line2a,line2b],goal2])
 	
 	arena3 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),15,4])
-	line3a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],2,2])
-	line3b = entitys.Line([(arena0.location),0,360,[(-1.00, -0.80),(-0.50, 0.50),(0.80, 1.00)],[],2,-2])
-	goal3 = entitys.Goal([((window_wid // 2)-100, (window_hgt // 2)+100),10,False,3],arena0)
+	line3a = entitys.Line([(arena3.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],2,2])
+	line3b = entitys.Line([(arena3.location),0,360,[(-1.00, -0.70),(-0.50, 0.50),(0.70, 1.00)],[],2,-2])
+	goal3 = entitys.Goal([(arena3.location),10,False,3],arena3)
 	battle3 = screens.Battle(["battle",arena3,[line3a,line3b],goal3])
 
 	battles = [battle0,battle1,battle2,battle3]
 	
 	# this game object is a circular
-	player = entitys.Player([((window_wid // 2), (window_hgt // 2)+100)])
+	player = entitys.Player([((window_wid / 2), (window_hgt / 2)+100)])
 	
 	game_state = next_state
 	
@@ -136,7 +136,7 @@ def main():
 			battles[player.level].update(player)
 			
 			#check if the player won
-			if (battles[player.level].arena.check(player,cutscene)):
+			if (battles[player.level].check(player,cutscene)):
 				next_state = STATE_CUTSCENE
 				
 		# if the player lost exit loop
