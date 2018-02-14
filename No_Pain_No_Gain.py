@@ -28,7 +28,8 @@ STATE_TITLE = 0
 STATE_CUTSCENE = 1
 STATE_ROOM = 2
 STATE_GAME = 3
-STATE_WIN = 4
+STATE_STORE = 4
+STATE_WIN = 100
 STATE_END = 99
 	
 #### ====================================================================================================================== ####
@@ -56,16 +57,20 @@ def main():
 	start_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	title = screens.Screen(["tittle",start_button,"No Pain No Gain",None,3])
 	
-	
-	
 	continue_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	cutscene = screens.Screen(["cutscene",continue_button,"No Input",None,1])
 	
 	battle_button = entitys.Button([(window_sfc.get_width()/2-200,window_sfc.get_height()/2-100),(100,100)])
 	train_button = entitys.Button([(window_sfc.get_width()/2,window_sfc.get_height()/2-100),(100,100)])
 	sleep_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
-	room = screens.Menu(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,2]])
+	room = screens.Room(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,4]])
 
+	speed_button = entitys.Button([(window_sfc.get_width()/2-200,window_sfc.get_height()/2-100),(100,100)])
+	health_button = entitys.Button([(window_sfc.get_width()/2,window_sfc.get_height()/2-100),(100,100)])
+	max_health_button = entitys.Button([(window_sfc.get_width()/2+200,window_sfc.get_height()/2-100),(100,100)])
+	back_button = entitys.Button([(window_sfc.get_width()/2-550,window_sfc.get_height()/2-250),(50,50)])
+	store = screens.Store(["store",[speed_button,health_button,max_health_button,back_button],"Speed, Health, or Max Health?",[4,4,4,2]])
+	
 	arena0 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)),4,0])
 	line0a = entitys.Line([(arena0.location),0,180,[(-1.00, -0.50),(-0.30, 0.30),(0.50, 1.00)],[],1,0])
 	goal0 = entitys.Goal([(arena0.location),10,False,1],arena0)
@@ -87,8 +92,18 @@ def main():
 	line3b = entitys.Line([(arena3.location),0,360,[(-1.00, -0.70),(-0.50, 0.50),(0.70, 1.00)],[],2,-2])
 	goal3 = entitys.Goal([(arena3.location),10,False,3],arena3)
 	battle3 = screens.Battle(["battle",arena3,[line3a,line3b],goal3])
+	
+	arena4 = entitys.Arena([(250),((window_wid // 2), (window_hgt // 2)-50),20,8])
+	line4a = entitys.Line([(arena4.location),0,120,[(0, 0.4),(0.6, 1.00)],[],2,2])
+	line4b = entitys.Line([(arena4.location),120,240,[(0, 0.4),(0.6, 1.00)],[],2,2])
+	line4c = entitys.Line([(arena4.location),240,360,[(0, 0.4),(0.6, 1.00)],[],2,2])
+	line4d = entitys.Line([(arena4.location),0,120,[(0, 0.4),(0.6, 1.00)],[],2,-2])
+	line4e = entitys.Line([(arena4.location),120,240,[(0, 0.4),(0.6, 1.00)],[],2,-2])
+	line4f = entitys.Line([(arena4.location),240,360,[(0, 0.4),(0.6, 1.00)],[],2,-2])
+	goal4 = entitys.Goal([(arena4.location),10,False,4],arena4)
+	battle4 = screens.Battle(["battle",arena4,[line4a,line4b,line4c,line4d,line4e,line4f],goal4])
 
-	battles = [battle0,battle1,battle2,battle3]
+	battles = [battle0,battle1,battle2,battle3,battle4]
 	
 	# this game object is a circular
 	player = entitys.Player([((window_wid / 2), (window_hgt / 2)+100)])
@@ -127,6 +142,12 @@ def main():
 			if(room.check_buttons(player)):
 				next_state = room.next_screen
 			closed_flag = room.quit()
+		
+		elif (game_state == STATE_STORE):
+		
+			if(store.check_buttons(player)):
+				next_state = store.next_screen
+			closed_flag = room.quit()
 			
 		#####################################################################################################
 		# this is the "update" phase of the game loop, where the changes to the game world are handled
@@ -153,6 +174,10 @@ def main():
 		elif (game_state == STATE_ROOM):
 		
 			room.render(player,window_sfc)
+			
+		elif (game_state == STATE_STORE):
+		
+			store.render(player,window_sfc)
 			
 		elif (game_state == STATE_GAME):
 		

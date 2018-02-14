@@ -30,7 +30,7 @@ class Button(Entity):
 			return False, (mouseX, mouseY)
 	
 	def render(self, window_sfc):
-		pygame.draw.rect(window_sfc, (0, 0, 255), (self.location)+(100,100), 0)
+		pygame.draw.rect(window_sfc, (0, 0, 255), (self.location)+(self.size), 0)
 		
 class Arena(Entity):
 
@@ -65,11 +65,14 @@ class Player (Entity):
 		self.size = (data[0] * 2,data[0] * 2)
 		self.destination = data[0]
 		self.moving = False
-		self.speed = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10]
-		self.health_levels= [100,110,120,130,140,150,160,170,180,190,200]
-		self.speed_level = 4
+		self.speed = [0.05,0.06,0.07,0.08,0.09,0.10,0.12,0.14,0.16,0.18,0.20]
+		self.speed_cost = [6,7,8,9,10,12,14,16,18,20]
+		self.health_levels = [100,110,120,130,140,150,160,170,180,190,200]
+		self.max_health_cost = [10,20,30,40,50,60,70,80,90,200]
+		self.speed_level = 0
 		self.health_level = 0
 		self.health = self.health_levels[self.health_level]
+		self.health_cost = 1
 		self.velocity = None
 		self.points = 0
 		self.money = 0
@@ -161,7 +164,7 @@ class Line (Entity):
 		self.location = data[0]
 		self.origin = data[1]
 		self.angle = self.origin
-		self.rotaion = data[2]
+		self.rotation = data[2]
 		self.lengths = data[3]
 		self.segments = data[4]
 		self.damage = data[5]

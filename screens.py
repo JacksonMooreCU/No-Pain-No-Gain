@@ -75,7 +75,7 @@ class Battle (Screen):
 			line.move_line()
 
 			# the rotating line angle ranges between 90 and 180 degrees
-			if line.angle > 179:
+			if line.angle > line.rotation:
 
 				# when it reaches an angle of 180 degrees, reposition the circular hitbox
 				
@@ -110,6 +110,11 @@ class Battle (Screen):
 				player.rank -= 1
 				player.level += 1
 			cutscene.next_screen = 2 #then go to the room
+			player.destination = None
+			player.velocity = None
+			player.moving = False
+			player.location = (self.arena.location[0],self.arena.location[1]+(self.arena.radius//2))
+			player.int_location = (self.arena.location[0],self.arena.location[1]+(self.arena.radius//2))
 			return True #return true for the battle is over
 		#if the player has no more health left
 		elif(player.health <= 0):
@@ -119,7 +124,7 @@ class Battle (Screen):
 		else:
 			return False#return false since the battle is not over
 		
-class Menu (Screen):
+class Room (Screen):
 
 	def __init__(self,data):
 		self.type = data[0]
@@ -135,7 +140,7 @@ class Menu (Screen):
 		window_sfc.fill( (255,0,0) )
 		
 		myfont = pygame.font.SysFont('Impact', 30)
-		self.text = "Battle, Train, or Rest? HP: "+str(player.health)+" Days: "+str(player.days)+" Rank: "+str(player.rank)
+		self.text = "Battle, Train, or Rest? HP: "+str(player.health)+" Days: "+str(player.days)+" Rank: "+str(player.rank)+" Money: "+str(player.money)
 		textsurface = myfont.render(self.text, False, (0, 0, 255))
 		window_sfc.blit(textsurface,(100, 50))
 		
@@ -150,10 +155,63 @@ class Menu (Screen):
 			
 				self.clicked = x
 				self.next_screen = self.next_screens[self.clicked]
+				if(x==1): 
+					player.training_mode=True
+					player.days += 1
+				elif(x==0): 
+					player.training_mode=False
+					player.days += 1
+					
+				return True
+				
+		return False
+		
+class Store (Screen):
+
+	def __init__(self,data):
+		self.type = data[0]
+		self.buttons = data[1]
+		self.text = data[2]
+		self.next_screens = data[3]
+		self.clicked = None
+		self.next_screen = None
+		
+	def render (self,player, window_sfc):
+	
+		# clear the window surface (by filling it with black)
+		window_sfc.fill( (255,0,0) )
+		
+		myfont = pygame.font.SysFont('Impact', 30)
+		self.text = "Increase speed, health, max health? Speed: "+str(player.speed_level)+" Health: "+str(player.health)+" Max Health: "+str(player.health_levels[player.health_level])
+		textsurface = myfont.render(self.text, False, (0, 0, 255))
+		window_sfc.blit(textsurface,(100, 50))
+		self.text = "Cost of speed, health, max health? Speed: "+str(player.speed_cost[player.speed_level])+" Health: "+str(player.health_cost)+" Max Health: "+str(player.max_health_cost[player.health_level])+" Money: "+str(player.money)
+		textsurface = myfont.render(self.text, False, (0, 0, 255))
+		window_sfc.blit(textsurface,(100, 100))
+		
+		for button in self.buttons:
+			button.render(window_sfc)
+			
+	def check_buttons(self,player):
+		
+		for x in range(len(self.buttons)):
+		
+			if (self.buttons[x].clicked()[0]):
+			
+				self.clicked = x
+				self.next_screen = self.next_screens[self.clicked]
 				player.days += 1
-				if(x==2 and player.health <=90): player.health+= 10
-				elif(x==1): player.training_mode=True
-				elif(x==0): player.training_mode=False
+				if(x==0 and player.money>=player.speed_cost[player.speed_level]): 
+					player.money -= player.speed_cost[player.speed_level]
+					player.speed_level+= 1
+					
+				if(x==1 and player.money>=player.max_health_cost[player.health_level]): 
+					player.money -= player.max_health_cost[player.health_level]
+					player.health_level+= 1
+					
+				if(x==1 and player.money>=player.health_cost and player.health<=100): 
+					player.money -= player.health_cost
+					player.health+= 1
 				return True
 				
 		return False
