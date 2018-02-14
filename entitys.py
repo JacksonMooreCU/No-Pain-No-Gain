@@ -67,11 +67,11 @@ class Player (Entity):
 		self.size = (data[0] * 2,data[0] * 2)
 		self.destination = data[0]
 		self.moving = False
-		self.speed = [0.05,0.06,0.07,0.08,0.09,0.10,0.12,0.14,0.16,0.18,0.20]
-		self.speed_cost = [6,7,8,9,10,12,14,16,18,20]
+		self.speed = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.12,0.14,0.16,0.18,0.20]
+		self.speed_cost = [2,3,4,5,6,7,8,9,10,12,14,16,18,20]
 		self.health_levels = [100,110,120,130,140,150,160,170,180,190,200]
 		self.max_health_cost = [10,20,30,40,50,60,70,80,90,200]
-		self.speed_level = 0
+		self.speed_level = 4
 		self.health_level = 0
 		self.health = self.health_levels[self.health_level]
 		self.health_cost = 1
@@ -84,6 +84,8 @@ class Player (Entity):
 		pos = list(self.location)
 		self.int_location = (int(pos[0]),int(pos[1]))
 		self.training_mode = False
+		self.click_speed = 1.1
+		self.current_click_speed = 1
 		
 	def render (self, window_sfc):
 	
@@ -103,25 +105,48 @@ class Player (Entity):
 		window_sfc.blit(textsurface,(100, 50))
 			
 	def check_moving (self, arena):
+		self.max_click_speed = ((arena.diameter)*self.speed[self.speed_level])
 		if (arena.clicked()[0]):
+		
+			#to increase speed when holding in one spot
+			if(self.destination == arena.clicked()[1]):
+				print(int(abs(self.velocity[0]*self.current_click_speed)),int(abs(self.velocity[1]*self.current_click_speed)),self.max_click_speed,self.current_click_speed)
+				if (abs(self.velocity[0]*self.current_click_speed)<self.max_click_speed and abs(self.velocity[1]*self.current_click_speed)<self.max_click_speed):
+					self.current_click_speed *= self.click_speed
+				
+				#decrease if over
+				else:
+					self.current_click_speed /= self.click_speed
+					
+			#decrease if not holding down in one spot
+			else:
+				if(self.current_click_speed>1):
+					self.current_click_speed /= self.click_speed
+				else:
+					self.current_click_speed = 1
+			
+			#reset speed if the player gets to their destination
+			if(self.destination == self.int_location):
+				self.current_click_speed = 1
+				
 			self.destination = arena.clicked()[1]
 			pos = self.location
 			target = self.destination
 			self.moving = True
 			
-			
 	def move(self,arena):
 		perimeter = arena.location
-		print("d:",self.destination,"l:",self.location)
+		#print("d:",self.destination,"l:",self.int_location,"v:",self.velocity)
 		pos = list(self.location)
+		iPos = list(self.int_location)
 		if (self.moving):
 		
-			target = pos[0]<self.destination[0] and pos[0]>self.destination[0] and pos[1]<self.destination[1] and pos[1]>self.destination[1]
-			bounds = pos[0]<perimeter[0]+arena.radius and pos[0]>perimeter[0]-arena.radius and pos[1]<perimeter[1]+arena.radius and pos[1]>perimeter[1]-arena.radius
+			target = iPos[0]<self.destination[0] and iPos[0]>self.destination[0] and iPos[1]<self.destination[1] and iPos[1]>self.destination[1]
+			bounds = iPos[0]<perimeter[0]+arena.radius and iPos[0]>perimeter[0]-arena.radius and iPos[1]<perimeter[1]+arena.radius and iPos[1]>perimeter[1]-arena.radius
 
 			if(bounds and not target):
-				x = (self.destination[0]-pos[0])*self.speed[self.speed_level]
-				y = (self.destination[1]-pos[1])*self.speed[self.speed_level]
+				x = ((self.destination[0]-pos[0])*self.speed[self.speed_level]) * self.current_click_speed
+				y = ((self.destination[1]-pos[1])*self.speed[self.speed_level]) * self.current_click_speed
 				self.velocity=(x,y)
 				pos[0] += self.velocity[0]
 				pos[1] += self.velocity[1]
@@ -141,6 +166,7 @@ class Player (Entity):
 		if(collided):
 			print("collided")
 			self.points += goal.value
+			self.current_click_speed = 1
 			goal.new(arena)
 			
 class Goal (Entity):
