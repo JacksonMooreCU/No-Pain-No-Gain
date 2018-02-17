@@ -61,9 +61,9 @@ def main():
 	continue_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
 	cutscene = screens.Screen(["cutscene",continue_button,"No Input",None,1])
 	
-	battle_button = entitys.Button([(window_sfc.get_width()/2-250,window_sfc.get_height()/2-50),(100,100)])
-	train_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2-50),(100,100)])
-	sleep_button = entitys.Button([(window_sfc.get_width()/2+150,window_sfc.get_height()/2-50),(100,100)])
+	battle_button = entitys.Button([(window_sfc.get_width()/2-250,window_sfc.get_height()/2+50),(100,100)])
+	train_button = entitys.Button([(window_sfc.get_width()/2-50,window_sfc.get_height()/2+50),(100,100)])
+	sleep_button = entitys.Button([(window_sfc.get_width()/2+150,window_sfc.get_height()/2+50),(100,100)])
 	room = screens.Room(["room",[battle_button,train_button,sleep_button],"Battle, Train, or Rest?",[3,3,4]])
 
 	speed_button = entitys.Button([(window_sfc.get_width()/2-200,window_sfc.get_height()/2-50),(100,100)])
@@ -120,7 +120,6 @@ def main():
 		# this is the "inputs" phase of the game loop, where player input is retrieved and stored
 		#####################################################################################################
 		if (game_state == STATE_TITLE):
-			time.sleep(0.1)
 			closed_flag = title.quit()
 			if (title.check_button()):
 				next_state = STATE_ROOM
