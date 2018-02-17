@@ -7,6 +7,7 @@ import entitys
 import pygame
 import random
 import math
+import time
 
 from pygame.locals import *
 pygame.font.init()	# you have to call this at the start, 
@@ -19,7 +20,7 @@ window_hgt = 600
 # the frame rate is the number of frames per second that will be displayed and although
 # we could (and should) measure the amount of time elapsed, for the sake of simplicity
 # we will make the (not unreasonable) assumption that this "delta time" is always 1/fps
-frame_rate = 20
+frame_rate = 30
 delta_time = 1 / frame_rate
 
 
@@ -119,7 +120,7 @@ def main():
 		# this is the "inputs" phase of the game loop, where player input is retrieved and stored
 		#####################################################################################################
 		if (game_state == STATE_TITLE):
-			
+			time.sleep(0.1)
 			closed_flag = title.quit()
 			if (title.check_button()):
 				next_state = STATE_ROOM
@@ -195,7 +196,6 @@ def main():
 		
 		# enforce the minimum frame rate
 		clock.tick(frame_rate)
-		
 	# if the player lost re run the game
 	if (game_state == STATE_END): 
 		main()

@@ -27,6 +27,7 @@ class Button(Entity):
 		(mouseX, mouseY) = pygame.mouse.get_pos()
 		if(mouseX<self.location[0]+self.size[0] and mouseX>self.location[0] and mouseY<self.location[1]+self.size[1] and mouseY>self.location[1] and pygame.mouse.get_pressed()[0]):
 			time.sleep(0.1)
+			print("clicked")
 			return True, (mouseX, mouseY)
 		else:	
 			return False, (mouseX, mouseY)
@@ -71,7 +72,7 @@ class Player (Entity):
 		self.speed_cost = [2,3,4,5,6,7,8,9,10,12,14,16,18,20]
 		self.health_levels = [100,110,120,130,140,150,160,170,180,190,200]
 		self.max_health_cost = [10,20,30,40,50,60,70,80,90,200]
-		self.speed_level = 4
+		self.speed_level = 0
 		self.health_level = 0
 		self.health = self.health_levels[self.health_level]
 		self.health_cost = 1
